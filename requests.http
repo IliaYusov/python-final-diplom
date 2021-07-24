@@ -1,107 +1,199 @@
-@admin_token = 02de9d7a3f811d2caf8688e1b7efc22717f0aaf3
-@user_token = 33833c5147b712a51ce3b23d64a6037a07d952a6
+@admin_token = 63cc81195fccb04b1f32f2d148faf11dbb825374
+@user_token = 81de2733759a15207a81950650e2d02783eae3da
 
 ###
 
-# получение продуктов
-GET http://127.0.0.1:8000/api/v1/products/?price__lte=200
+# регистрация пользователя
+POST http://127.0.0.1:8000/api/v1/user/register
 Content-Type: application/json
-
-###
-
-# создание продуктов
-POST http://127.0.0.1:8000/api/v1/products/
-Content-Type: application/json
-Authorization: Token {{admin_token}}
 
 {
-  "name": "Iphone",
-  "description": "XS",
-  "price": 99999.99
+  "first_name": "John",
+  "last_name": "Dow",
+  "email": "ilyich@mail.ru",
+  "password": "Sdgsgjsfj@3324",
+  "company": "Mail.ru",
+  "position": "manager"
 }
 
 ###
 
-# получение отзывов
-GET http://127.0.0.1:8000/api/v1/product-reviews/
+# подтверждение пользователя
+POST http://127.0.0.1:8000/api/v1/user/register/confirm
 Content-Type: application/json
-
-###
-
-# создание отзыва
-POST http://127.0.0.1:8000/api/v1/product-reviews/
-Content-Type: application/json
-Authorization: Token {{admin_token}}
 
 {
-  "product_id": 45,
-  "text": "excellent",
-  "rating": 1
+  "email": "ilyich@mail.ru",
+  "token": "3281dfc94c991c485"
 }
 
 ###
 
-# получение заказов
-GET http://127.0.0.1:8000/api/v1/orders/
+# логин пользователя
+POST http://127.0.0.1:8000/api/v1/user/login
 Content-Type: application/json
-Authorization: Token {{admin_token}}
-
-###
-
-# создание заказа
-POST http://127.0.0.1:8000/api/v1/orders/
-Content-Type: application/json
-Authorization: Token {{admin_token}}
 
 {
-  "products": [
-    {
-      "product_id": 3,
-      "quantity": 10
-    },
-        {
-      "product_id": 1,
-      "quantity": 13
-    }
-    ]
+  "email": "ilyich@mail.ru",
+  "password": "Sdgsgjsfj@3324"
 }
 
 ###
 
-# изменение заказа
-PATCH http://127.0.0.1:8000/api/v1/orders/5/
+# получаем детали пользователя
+GET http://127.0.0.1:8000/api/v1/user/details
 Content-Type: application/json
 Authorization: Token {{admin_token}}
 
+###
+
+# меняем детали пользователя
+POST http://127.0.0.1:8000/api/v1/user/details
+Content-Type: application/json
+Authorization: Token {{user_token}}
+
 {
-  "status": "DONE"
+  "position": "CEO"
 }
 
 ###
 
-# удаление заказа
-DELETE  http://127.0.0.1:8000/api/v1/orders/66/
+# просмотр контактов пользователя
+GET http://127.0.0.1:8000/api/v1/user/contact
 Content-Type: application/json
 Authorization: Token {{user_token}}
 
 ###
 
-# получение подборок
-GET http://127.0.0.1:8000/api/v1/product-collections/
+# добавляем контакт пользователя
+POST http://127.0.0.1:8000/api/v1/user/contact
 Content-Type: application/json
+Authorization: Token {{user_token}}
+
+{
+  "city": "Moscow",
+  "street": "Tverskaya str.",
+  "phone": "+77951455886"
+}
 
 ###
 
-# создание подборки
-POST http://127.0.0.1:8000/api/v1/product-collections/
+# удаляем контакт пользователя
+DELETE http://127.0.0.1:8000/api/v1/user/contact
+Content-Type: application/json
+Authorization: Token {{user_token}}
+
+{
+  "items": "4"
+}
+
+###
+
+# обновляем прайс от партнера
+POST http://127.0.0.1:8000/api/v1/partner/update
 Content-Type: application/json
 Authorization: Token {{admin_token}}
 
 {
-  "name": "Суперподборка",
-  "text": "Много всего",
-  "products": [
-      {"product_id":12},
-      {"product_id":14}
-    ]
+  "url": "https://raw.githubusercontent.com/netology-code/python-final-diplom/master/data/shop1.yaml"
 }
+
+###
+
+# просмотр статуса партнера
+GET http://127.0.0.1:8000/api/v1/partner/state
+Content-Type: application/json
+Authorization: Token {{admin_token}}
+
+###
+
+# изменяем статус партнера
+POST http://127.0.0.1:8000/api/v1/partner/state
+Content-Type: application/json
+Authorization: Token {{admin_token}}
+
+{
+  "state": "on"
+}
+
+###
+
+# просмотр заказов партнера
+GET http://127.0.0.1:8000/api/v1/partner/orders
+Content-Type: application/json
+Authorization: Token {{admin_token}}
+
+###
+
+# просмотр категорий
+GET http://127.0.0.1:8000/api/v1/categories
+Content-Type: application/json
+Authorization: Token {{user_token}}
+
+###
+
+# просмотр магазинов
+GET http://127.0.0.1:8000/api/v1/shops
+Content-Type: application/json
+Authorization: Token {{user_token}}
+
+###
+
+# просмотр продуктов
+GET http://127.0.0.1:8000/api/v1/products?shop_id=1&category_id=224
+Content-Type: application/json
+Authorization: Token {{user_token}}
+
+###
+
+# просмотр корзины
+GET http://127.0.0.1:8000/api/v1/basket
+Content-Type: application/json
+Authorization: Token {{user_token}}
+
+###
+
+# добавить позиции в корзину
+POST http://127.0.0.1:8000/api/v1/basket
+Content-Type: application/x-www-form-urlencoded
+Authorization: Token {{user_token}}
+
+items=[{"product_info": 5,"quantity": 1}]
+
+###
+
+# редактировать количество товаров в корзину
+PUT http://127.0.0.1:8000/api/v1/basket
+Content-Type: application/x-www-form-urlencoded
+Authorization: Token {{user_token}}
+
+items=[{"id": 1,"quantity": 2}]
+
+###
+
+# удалить товаровы из корзину
+DELETE http://127.0.0.1:8000/api/v1/basket
+Content-Type: application/x-www-form-urlencoded
+Authorization: Token {{user_token}}
+
+items=1
+
+###
+
+# разместить заказ
+POST http://127.0.0.1:8000/api/v1/order
+Content-Type: application/x-www-form-urlencoded
+Authorization: Token {{user_token}}
+
+id=1&contact=3
+
+###
+
+# получить мои заказы
+GET http://127.0.0.1:8000/api/v1/order
+Content-Type: application/x-www-form-urlencoded
+Authorization: Token {{user_token}}
+
+id=1&contact=3
+
+###

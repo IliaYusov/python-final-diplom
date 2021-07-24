@@ -45,7 +45,7 @@ class RegisterAccount(APIView):
                 return JsonResponse({'Status': False, 'Errors': {'password': error_array}})
             else:
                 # проверяем данные для уникальности имени пользователя
-                request.data._mutable = True
+                # request.data._mutable = True
                 request.data.update({})
                 user_serializer = UserSerializer(data=request.data)
                 if user_serializer.is_valid():
@@ -58,7 +58,7 @@ class RegisterAccount(APIView):
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
 
 class ConfirmAccount(APIView):
@@ -79,9 +79,9 @@ class ConfirmAccount(APIView):
                 token.delete()
                 return JsonResponse({'Status': True})
             else:
-                return JsonResponse({'Status': False, 'Errors': 'Неправильно указан токен или email'})
+                return JsonResponse({'Status': False, 'Errors': 'Wrong token or email'})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
 
 class AccountDetails(APIView):
@@ -142,9 +142,9 @@ class LoginAccount(APIView):
 
                     return JsonResponse({'Status': True, 'Token': token.key})
 
-            return JsonResponse({'Status': False, 'Errors': 'Не удалось авторизовать'})
+            return JsonResponse({'Status': False, 'Errors': 'Not authorized'})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
 
 class CategoryView(ListAPIView):
@@ -179,7 +179,7 @@ class ProductInfoView(APIView):
         if category_id:
             query = query & Q(product__category_id=category_id)
 
-        # фильтруем и отбрасываем дуликаты
+        # фильтруем и отбрасываем дубликаты
         queryset = ProductInfo.objects.filter(
             query).select_related(
             'shop', 'product__category').prefetch_related(
@@ -208,7 +208,7 @@ class BasketView(APIView):
         serializer = OrderSerializer(basket, many=True)
         return Response(serializer.data)
 
-    # редактировать корзину
+    # добавить товары в корзину
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -218,7 +218,7 @@ class BasketView(APIView):
             try:
                 items_dict = load_json(items_sting)
             except ValueError:
-                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
+                JsonResponse({'Status': False, 'Errors': 'Wrong request format'})
             else:
                 basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
                 objects_created = 0
@@ -237,8 +237,8 @@ class BasketView(APIView):
 
                         JsonResponse({'Status': False, 'Errors': serializer.errors})
 
-                return JsonResponse({'Status': True, 'Создано объектов': objects_created})
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+                return JsonResponse({'Status': True, 'Objects created': objects_created})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
     # удалить товары из корзины
     def delete(self, request, *args, **kwargs):
@@ -258,10 +258,10 @@ class BasketView(APIView):
 
             if objects_deleted:
                 deleted_count = OrderItem.objects.filter(query).delete()[0]
-                return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+                return JsonResponse({'Status': True, 'Objects deleted': deleted_count})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
-    # добавить позиции в корзину
+    # редактировать количество товаров в корзине
     def put(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -271,7 +271,7 @@ class BasketView(APIView):
             try:
                 items_dict = load_json(items_sting)
             except ValueError:
-                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
+                JsonResponse({'Status': False, 'Errors': 'Wrong request format'})
             else:
                 basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
                 objects_updated = 0
@@ -280,8 +280,8 @@ class BasketView(APIView):
                         objects_updated += OrderItem.objects.filter(order_id=basket.id, id=order_item['id']).update(
                             quantity=order_item['quantity'])
 
-                return JsonResponse({'Status': True, 'Обновлено объектов': objects_updated})
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+                return JsonResponse({'Status': True, 'Objects updated': objects_updated})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
 
 class PartnerUpdate(APIView):
@@ -293,7 +293,7 @@ class PartnerUpdate(APIView):
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
         if request.user.type != 'shop':
-            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'For shops only'}, status=403)
 
         url = request.data.get('url')
         if url:
@@ -331,7 +331,7 @@ class PartnerUpdate(APIView):
 
                 return JsonResponse({'Status': True})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
 
 class PartnerState(APIView):
@@ -345,7 +345,7 @@ class PartnerState(APIView):
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
         if request.user.type != 'shop':
-            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'For shops only'}, status=403)
 
         shop = request.user.shop
         serializer = ShopSerializer(shop)
@@ -357,7 +357,7 @@ class PartnerState(APIView):
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
         if request.user.type != 'shop':
-            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'For shops only'}, status=403)
         state = request.data.get('state')
         if state:
             try:
@@ -366,7 +366,7 @@ class PartnerState(APIView):
             except ValueError as error:
                 return JsonResponse({'Status': False, 'Errors': str(error)})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
 
 class PartnerOrders(APIView):
@@ -378,7 +378,7 @@ class PartnerOrders(APIView):
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
         if request.user.type != 'shop':
-            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'For shops only'}, status=403)
 
         order = Order.objects.filter(
             ordered_items__product_info__shop__user_id=request.user.id).exclude(state='basket').prefetch_related(
@@ -410,7 +410,7 @@ class ContactView(APIView):
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
         if {'city', 'street', 'phone'}.issubset(request.data):
-            request.data._mutable = True
+            # request.data._mutable = True
             request.data.update({'user': request.user.id})
             serializer = ContactSerializer(data=request.data)
 
@@ -420,7 +420,7 @@ class ContactView(APIView):
             else:
                 JsonResponse({'Status': False, 'Errors': serializer.errors})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
     # удалить контакт
     def delete(self, request, *args, **kwargs):
@@ -439,8 +439,8 @@ class ContactView(APIView):
 
             if objects_deleted:
                 deleted_count = Contact.objects.filter(query).delete()[0]
-                return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+                return JsonResponse({'Status': True, 'Objects deleted': deleted_count})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
     # редактировать контакт
     def put(self, request, *args, **kwargs):
@@ -459,12 +459,12 @@ class ContactView(APIView):
                     else:
                         JsonResponse({'Status': False, 'Errors': serializer.errors})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
 
 class OrderView(APIView):
     """
-    Класс для получения и размешения заказов пользователями
+    Класс для получения и размещения заказов пользователями
     """
 
     # получить мои заказы
@@ -494,10 +494,10 @@ class OrderView(APIView):
                         state='new')
                 except IntegrityError as error:
                     print(error)
-                    return JsonResponse({'Status': False, 'Errors': 'Неправильно указаны аргументы'})
+                    return JsonResponse({'Status': False, 'Errors': 'Wrong parameters'})
                 else:
                     if is_updated:
                         new_order.send(sender=self.__class__, user_id=request.user.id)
                         return JsonResponse({'Status': True})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
