@@ -1,9 +1,15 @@
-from django.urls import path
+from django.urls import path, include
 from django_rest_passwordreset.views import reset_password_request_token, reset_password_confirm
 
-from backend.views import PartnerUpdate, RegisterAccount, LoginAccount, CategoryView, ShopView, ProductInfoView, \
+from backend.views import PartnerUpdate, RegisterAccount, LoginAccount, CategoryViewSet, ShopViewSet, ProductInfoView, \
     BasketView, AccountDetails, ContactView, OrderView, PartnerState, PartnerOrders, ConfirmAccount, \
     PasswordResetRequest, PasswordResetConfirm
+from rest_framework.routers import DefaultRouter
+
+
+router = DefaultRouter()
+router.register('categories', CategoryViewSet)
+router.register('shops', ShopViewSet)
 
 app_name = 'backend'
 urlpatterns = [
@@ -17,10 +23,8 @@ urlpatterns = [
     path('user/login', LoginAccount.as_view(), name='user-login'),
     path('user/password_reset', PasswordResetRequest.as_view(), name='password-reset'),
     path('user/password_reset/confirm', PasswordResetConfirm.as_view(), name='password-reset-confirm'),
-    path('categories', CategoryView.as_view(), name='categories'),
-    path('shops', ShopView.as_view(), name='shops'),
     path('products', ProductInfoView.as_view(), name='shops'),
     path('basket', BasketView.as_view(), name='basket'),
     path('order', OrderView.as_view(), name='order'),
-
+    path('', include(router.urls))
 ]

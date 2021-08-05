@@ -87,7 +87,7 @@ Authorization: Token {{user_token}}
 ###
 
 # добавляем контакт пользователя
-POST http://127.0.0.1:8000/api/v1/user/contact
+POST http://127.0.0.1:8000/api/v1/user/contact/
 Content-Type: application/json
 Authorization: Token {{user_token}}
 
@@ -147,14 +147,14 @@ Authorization: Token {{admin_token}}
 ###
 
 # просмотр категорий
-GET http://127.0.0.1:8000/api/v1/categories
+GET http://127.0.0.1:8000/api/v1/categories/
 Content-Type: application/json
 Authorization: Token {{user_token}}
 
 ###
 
 # просмотр магазинов
-GET http://127.0.0.1:8000/api/v1/shops
+GET http://127.0.0.1:8000/api/v1/shops/
 Content-Type: application/json
 Authorization: Token {{user_token}}
 
