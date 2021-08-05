@@ -16,10 +16,11 @@ from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
 
 from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
-    Contact, ConfirmEmailToken
+    Contact, ConfirmEmailToken, User
 from backend.serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
-from backend.signals import new_user_registered, new_order
+
+from .tasks import new_order_task, new_user_registered_task
 
 
 class RegisterAccount(APIView):
@@ -53,7 +54,7 @@ class RegisterAccount(APIView):
                     user = user_serializer.save()
                     user.set_password(request.data['password'])
                     user.save()
-                    new_user_registered.send(sender=self.__class__, user_id=user.id)
+                    new_user_registered_task.delay(user_id=user.id)
                     return JsonResponse({'Status': True})
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
@@ -80,6 +81,62 @@ class ConfirmAccount(APIView):
                 return JsonResponse({'Status': True})
             else:
                 return JsonResponse({'Status': False, 'Errors': 'Wrong token or email'})
+
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
+
+
+class PasswordResetRequest(APIView):
+    """
+    Класс для запроса сброса пароля
+    """
+    # Регистрация методом POST
+    def post(self, request, *args, **kwargs):
+
+        # проверяем обязательные аргументы
+        if {'email'}.issubset(request.data):
+
+            user = User.objects.filter(email=request.data['email']).first()
+            if user:
+                new_user_registered_task.delay(user_id=user.id)
+                return JsonResponse({'Status': True})
+            else:
+                return JsonResponse({'Status': False, 'Errors': 'Wrong token or email'})
+
+        return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
+
+
+class PasswordResetConfirm(APIView):
+    """
+    Класс для подтверждения смены пароля
+    """
+    # Регистрация методом POST
+    def post(self, request, *args, **kwargs):
+
+        # проверяем обязательные аргументы
+        if {'email', 'token', 'password'}.issubset(request.data):
+
+            # проверяем новый пароль
+
+            try:
+                validate_password(request.data['password'])
+            except Exception as password_error:
+                error_array = []
+                for item in password_error:
+                    error_array.append(item)
+                return JsonResponse({'Status': False, 'Errors': {'password': error_array}})
+            else:
+                token = ConfirmEmailToken.objects.filter(user__email=request.data['email'],
+                                                         key=request.data['token']).first()
+                if token:
+                    user = User.objects.filter(email=request.data['email']).first()
+                    user.set_password(request.data['password'])
+                    user.save()
+                    token.delete()
+                    access_token, _ = Token.objects.get_or_create(user=user)
+                    access_token.delete()
+                    return JsonResponse({'Status': True})
+                else:
+                    return JsonResponse({'Status': False, 'Errors': 'Wrong token or email'})
 
         return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})
 
@@ -497,7 +554,7 @@ class OrderView(APIView):
                     return JsonResponse({'Status': False, 'Errors': 'Wrong parameters'})
                 else:
                     if is_updated:
-                        new_order.send(sender=self.__class__, user_id=request.user.id)
+                        new_order_task.delay(user_id=request.user.id)
                         return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Not all required parameters sent'})

@@ -1,5 +1,5 @@
 @admin_token = 63cc81195fccb04b1f32f2d148faf11dbb825374
-@user_token = 81de2733759a15207a81950650e2d02783eae3da
+@user_token = 8a52aa41234b3d885b122192d8d45390c1afc8ae
 
 ###
 
@@ -35,11 +35,32 @@ Content-Type: application/json
 
 {
   "email": "ilyich@mail.ru",
-  "password": "Sdgsgjsfj@3324"
+  "password": "DFgdfgjk4e43@#"
 }
 
 ###
 
+# сброс пароля пользователя
+POST http://127.0.0.1:8000/api/v1/user/password_reset
+Content-Type: application/json
+
+{
+  "email": "ilyich@mail.ru"
+}
+
+###
+
+# подтверждение сброса пароля пользователя
+POST http://127.0.0.1:8000/api/v1/user/password_reset/confirm
+Content-Type: application/json
+
+{
+  "email": "ilyich@mail.ru",
+  "token": "80c5f87c6023dfa950abe8d29bfd3340dd6b7457845b",
+  "password": "DFgdfgjk4e43@#"
+}
+
+###
 # получаем детали пользователя
 GET http://127.0.0.1:8000/api/v1/user/details
 Content-Type: application/json
