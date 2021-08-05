@@ -26,27 +26,6 @@ def reset_password_token_created_task(user_id):
     msg.send()
 
 
-@celery.task(name="new_user_registered_task")
-def new_user_registered_task(user_id):
-    """
-    отправляем письмо с подтрердждением почты
-    """
-    # send an e-mail to the user
-    token, _ = ConfirmEmailToken.objects.get_or_create(user_id=user_id)
-
-    msg = EmailMultiAlternatives(
-        # title:
-        f"Password Reset Token for {token.user.email}",
-        # message:
-        token.key,
-        # from:
-        settings.EMAIL_HOST_USER,
-        # to:
-        [token.user.email]
-    )
-    msg.send()
-
-
 @celery.task(name="new_order_task")
 def new_order_task(user_id):
     """

@@ -20,7 +20,7 @@ from backend.models import Shop, Category, Product, ProductInfo, Parameter, Prod
 from backend.serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
 
-from .tasks import new_order_task, new_user_registered_task
+from .tasks import new_order_task, reset_password_token_created_task
 
 
 class RegisterAccount(APIView):
@@ -54,7 +54,7 @@ class RegisterAccount(APIView):
                     user = user_serializer.save()
                     user.set_password(request.data['password'])
                     user.save()
-                    new_user_registered_task.delay(user_id=user.id)
+                    reset_password_token_created_task.delay(user_id=user.id)
                     return JsonResponse({'Status': True})
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
@@ -97,7 +97,7 @@ class PasswordResetRequest(APIView):
 
             user = User.objects.filter(email=request.data['email']).first()
             if user:
-                new_user_registered_task.delay(user_id=user.id)
+                reset_password_token_created_task.delay(user_id=user.id)
                 return JsonResponse({'Status': True})
             else:
                 return JsonResponse({'Status': False, 'Errors': 'Wrong token or email'})
