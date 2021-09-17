@@ -8,8 +8,8 @@ from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()
-router.register('categories', CategoryViewSet)
-router.register('shops', ShopViewSet)
+router.register('categories', CategoryViewSet, basename='categories')
+router.register('shops', ShopViewSet, basename='shops')
 
 app_name = 'backend'
 urlpatterns = [
@@ -23,7 +23,7 @@ urlpatterns = [
     path('user/login', LoginAccount.as_view(), name='user-login'),
     path('user/password_reset', PasswordResetRequest.as_view(), name='password-reset'),
     path('user/password_reset/confirm', PasswordResetConfirm.as_view(), name='password-reset-confirm'),
-    path('products', ProductInfoView.as_view(), name='shops'),
+    path('products', ProductInfoView.as_view(), name='products'),
     path('basket', BasketView.as_view(), name='basket'),
     path('order', OrderView.as_view(), name='order'),
     path('', include(router.urls))
