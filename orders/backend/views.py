@@ -27,6 +27,8 @@ class RegisterAccount(APIView):
     """
     Для регистрации покупателей
     """
+    throttle_scope = 'emails'
+
     # Регистрация методом POST
     def post(self, request, *args, **kwargs):
 
@@ -66,6 +68,8 @@ class ConfirmAccount(APIView):
     """
     Класс для подтверждения почтового адреса
     """
+    throttle_scope = 'emails'
+
     # Регистрация методом POST
     def post(self, request, *args, **kwargs):
 
@@ -89,6 +93,9 @@ class PasswordResetRequest(APIView):
     """
     Класс для запроса сброса пароля
     """
+
+    throttle_scope = 'emails'
+
     # Регистрация методом POST
     def post(self, request, *args, **kwargs):
 
@@ -347,6 +354,8 @@ class PartnerUpdate(APIView):
     """
     Класс для обновления прайса от поставщика
     """
+    throttle_scope = 'uploads'
+
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
