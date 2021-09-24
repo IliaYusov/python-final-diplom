@@ -6,6 +6,7 @@ from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema
 from requests import get
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -251,7 +252,8 @@ class BasketView(APIView):
     Класс для работы с корзиной пользователя
     """
 
-    # получить корзину
+    # получить
+    @extend_schema(responses=OrderSerializer)
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -265,6 +267,7 @@ class BasketView(APIView):
         return Response(serializer.data)
 
     # добавить товары в корзину
+    @extend_schema(responses=OrderItemSerializer)
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -396,6 +399,7 @@ class PartnerState(APIView):
     """
 
     # получить текущий статус
+    @extend_schema(responses=ShopSerializer)
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -408,6 +412,7 @@ class PartnerState(APIView):
         return Response(serializer.data)
 
     # изменить текущий статус
+    @extend_schema(responses=ShopSerializer)
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -429,6 +434,7 @@ class PartnerOrders(APIView):
     """
     Класс для получения заказов поставщиками
     """
+    @extend_schema(responses=OrderSerializer)
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
